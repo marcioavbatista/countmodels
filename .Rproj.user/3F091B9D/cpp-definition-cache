@@ -1,0 +1,161 @@
+[
+    {
+        "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/inst/include/stan_meta_header.hpp",
+        "file_last_write": 1755710581.0,
+        "definitions": [],
+        "hidden": false
+    },
+    {
+        "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.cc",
+        "file_last_write": 1755711730.0,
+        "definitions": [],
+        "hidden": false
+    },
+    {
+        "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+        "file_last_write": 1755711730.0,
+        "definitions": [
+            {
+                "usr": "c:stanExports_lm.h@770@macro@STAN__SERVICES__COMMAND_HPP",
+                "kind": 9,
+                "parent_name": "",
+                "name": "STAN__SERVICES__COMMAND_HPP",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 19,
+                "column": 9,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm",
+                "kind": 2,
+                "parent_name": "",
+                "name": "model_lm",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 42,
+                "column": 7,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@model_name#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "model_name",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 127,
+                "column": 22,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@model_compile_info#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "model_compile_info",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 130,
+                "column": 35,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@get_param_names#&I#1b#1b#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "get_param_names(int &, const bool, const bool)",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 302,
+                "column": 3,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@get_dims#&I#1b#1b#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "get_dims(int &, const bool, const bool)",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 310,
+                "column": 3,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@constrained_param_names#&I#b#b#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "constrained_param_names(int &, bool, bool)",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 319,
+                "column": 3,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@unconstrained_param_names#&I#b#b#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "unconstrained_param_names(int &, bool, bool)",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 329,
+                "column": 3,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@get_constrained_sizedtypes#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "get_constrained_sizedtypes",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 338,
+                "column": 22,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@get_unconstrained_sizedtypes#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "get_unconstrained_sizedtypes",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 341,
+                "column": 22,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@transform_inits#&1$@N@stan@N@io@S@var_context#&I#*$@N@std@S@basic_ostream>#C#$@N@std@S@char_traits>#C#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "transform_inits(const stan::io::var_context &, int &, std::ostream *)",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 389,
+                "column": 3,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@transform_inits#&1$@N@stan@N@io@S@var_context#&I#S2_#*$@N@std@S@basic_ostream>#C#$@N@std@S@char_traits>#C#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "transform_inits(const stan::io::var_context &, int &, int &, std::ostream *)",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 399,
+                "column": 3,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@unconstrain_array#&1I#&I#*$@N@std@S@basic_ostream>#C#$@N@std@S@char_traits>#C#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "unconstrain_array(const int &, int &, std::ostream *)",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 406,
+                "column": 3,
+                "hidden": false
+            },
+            {
+                "usr": "c:@N@model_lm_namespace@S@model_lm@F@unconstrain_array#&1I#&I#*$@N@std@S@basic_ostream>#C#$@N@std@S@char_traits>#C#1",
+                "kind": 7,
+                "parent_name": "model_lm",
+                "name": "unconstrain_array(const int &, int &, std::ostream *)",
+                "file": "C:/Users/nicol/OneDrive/Faculdade/IC/countmodels/src/stanExports_lm.h",
+                "line": 416,
+                "column": 3,
+                "hidden": false
+            }
+        ],
+        "hidden": false
+    }
+]
