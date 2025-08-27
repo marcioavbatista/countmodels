@@ -14,3 +14,4 @@ model {
 
   y ~ normal(intercept + beta * x, sigma);
 }
+
