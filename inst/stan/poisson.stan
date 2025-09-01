@@ -7,7 +7,7 @@ functions{
 data{
   int<lower=1> n;
   int<lower=1> p;
-  array[n] int y;
+  array[n] int<lower=0> y;
   matrix[n, p] X;
   int<lower = 1, upper = 3> link;
   row_vector[p] x_mean;
@@ -21,7 +21,6 @@ parameters{
   vector[p] beta_std;
 }
 
-
 transformed parameters{
   vector[p] beta;
   if(p==1){
@@ -33,31 +32,14 @@ transformed parameters{
 }
 
 model{
-
-  vector[n] lp = X*beta_std;
-  vector[n] mu = linkinv_bell(lp, link);
-  array[n] real theta;// = lambert_w0(mu);
-  for(i in 1:n){
-    //mu[i] = exp(eta[i]);
-    //theta[i] = lambertW(mu[i]);
-    theta[i] = lambert_w0(mu[i]); // Stan implementation
-  }
-
-  target += loglik_bell(y, theta);
+  target += sum(loglik_poisson(y, X, beta_std, link));
   if(approach==1){
-    beta_std ~ normal(mu_beta, sigma_beta);
+    beta ~ normal(mu_beta, sigma_beta);
   }
 
 }
-
 
 generated quantities{
-  vector[approach == 1 ? n : 0] log_lik;
-  if(approach == 1){
-    for(i in 1:n){
-      log_lik = loglik_bellreg(y, X, beta, link);
-    }
-
-  }
-
+  vector[n] log_lik = loglik_poisson(y, X, beta, link);
 }
+

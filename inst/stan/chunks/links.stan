@@ -1,5 +1,3 @@
-functions{
-
 vector inv_logit2(vector lp){
   int n = num_elements(lp);
   vector[n] x;
@@ -42,4 +40,3 @@ vector linkinv_bern(vector lp, int link) {
   return lp; // never reached
 }
 
-}
