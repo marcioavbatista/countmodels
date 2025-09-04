@@ -7,7 +7,7 @@ countmodel <- function(
   approach = c("mle", "bayes"),
   hessian = TRUE,
   link1 = c("log", "sqrt", "identity"),
-  link2 = c("log", "sqrt", "identity"),
+  link2 = c("logit", "probit", "cloglog", "cauchy"),
   hyperpars = list(
     mu_psi = NULL,
     sigma_psi = NULL,
@@ -18,53 +18,47 @@ countmodel <- function(
   ),
   ...
 ) {
-  hyperpars_aux <- function(hyperpars, simp = F) {
-    if (simp) {
-      for (nome in names(hyperpars)) {
-        if (startsWith(nome, "mu_beta") && !is.null(hyperpars[[nome]])) {
-          hyperpars[[nome]] <- rep(0, p) # vetor de zeros
-        } else if (
-          startsWith(nome, "sigma_beta") && !is.null(hyperpars[[nome]])
-        ) {
-          hyperpars[[nome]] <- diag(10, p, p) # matriz pxp com diagonal 10
-        } else if (
-          (startsWith(nome, "a") || startsWith(nome, "b")) &&
-            !is.null(hyperpars[[nome]])
-        ) {
-          hyperpars[[nome]] <- 0.01 # valor numérico
+  hyperpars_aux <- function(hyperpars, p = NULL, q = NULL, simp = FALSE) {
+    for (nome in names(hyperpars)) {
+      # Só altera se o valor atual for NULL
+      if (is.null(hyperpars[[nome]])) {
+        if (simp) {
+          if (grepl("mu_beta", nome)) {
+            hyperpars[[nome]] <- rep(0, p)
+          } else if (grepl("sigma_beta", nome)) {
+            hyperpars[[nome]] <- diag(10, p, p)
+          } else if (grepl("a|b", nome)) {
+            hyperpars[[nome]] <- 0.01
+          }
+        } else {
+          # caso completo
+          if (grepl("mu_beta", nome)) {
+            hyperpars[[nome]] <- rep(0, p)
+          } else if (grepl("sigma_beta", nome)) {
+            hyperpars[[nome]] <- diag(10, p, p)
+          } else if (grepl("mu_psi", nome)) {
+            hyperpars[[nome]] <- rep(0, q)
+          } else if (grepl("sigma_psi", nome)) {
+            hyperpars[[nome]] <- diag(10, q, q)
+          } else if (grepl("a|b", nome)) {
+            hyperpars[[nome]] <- 0.01
+          }
         }
       }
-      return(hyperpars)
-    } else {
-      for (nome in names(hyperpars)) {
-        if (startsWith(nome, "mu") && !is.null(hyperpars[[nome]])) {
-          hyperpars[[nome]] <- rep(0, p) # vetor de zeros
-        } else if (
-          startsWith(nome, "sigma_psi") && !is.null(hyperpars[[nome]])
-        ) {
-          hyperpars[[nome]] <- diag(10, q, q) # matriz pxp com diagonal 10
-        } else if (
-          startsWith(nome, "sigma_beta") && !is.null(hyperpars[[nome]])
-        ) {
-          hyperpars[[nome]] <- diag(10, p, p) # matriz pxp com diagonal 10
-        } else if (
-          (startsWith(nome, "a") || startsWith(nome, "b")) &&
-            !is.null(hyperpars[[nome]])
-        ) {
-          hyperpars[[nome]] <- 0.01 # valor numérico
-        }
-      }
-
-      return(hyperpars)
     }
-  }
 
+    return(hyperpars)
+  }
+  case <- match.arg(case)
+  dist <- switch(family, "poisson" = 1, "negbinom" = 2)
+  case_id <- switch(case, "inflated" = 1, "hurdle" = 2)
   approach <- match.arg(approach)
   family <- match.arg(family)
-  case <- match.arg(case)
 
   if (case == "standard") {
-    link1 <- match.arg(link1)
+    classr <- switch(family, "poisson" = "cmps", "negbin" = "cmnb")
+
+    link <- match.arg(link1)
     mf <- stats::model.frame(formula = formula, data = data)
     Terms <- stats::terms(mf)
     X <- as.matrix(stats::model.matrix(attr(mf, "terms"), data = mf))
@@ -72,7 +66,7 @@ countmodel <- function(
     y <- stats::model.response(mf)
     n <- nrow(X)
     p <- ncol(X)
-    hyperpars <- hyperpars_aux(hyperpars, simp = T)
+    hyperpars <- hyperpars_aux(hyperpars, p = p, simp = T)
 
     if (match("(Intercept)", labels) == 1) {
       X_std <- scale(X[, -1])
@@ -88,122 +82,78 @@ countmodel <- function(
       Delta <- diag(1 / x_sd)
     }
 
-    Link <- switch(link1, "log" = 1, "sqrt" = 2, "identity" = 3)
+    Link <- switch(link, "log" = 1, "sqrt" = 2, "identity" = 3)
 
-    if (family == "poisson") {
-      stan_data <- list(
-        y = y,
-        X = X_std,
-        n = n,
-        p = p,
-        x_mean = x_mean,
-        x_sd = x_sd,
-        mu_beta = hyperpars$mu_beta,
-        sigma_beta = hyperpars$sigma_beta,
-        a_theta = hyperpars$a_theta,
-        b_theta = hyperpars$b_theta,
-        approach = 0,
-        link = Link,
-        dist = 1
+    stan_data <- list(
+      y = y,
+      X = X_std,
+      n = n,
+      p = p,
+      x_mean = x_mean,
+      x_sd = x_sd,
+      mu_beta = hyperpars$mu_beta,
+      sigma_beta = hyperpars$sigma_beta,
+      a_theta = hyperpars$a_theta,
+      b_theta = hyperpars$b_theta,
+      approach = 0,
+      link = Link,
+      dist = dist
+    )
+
+    if (approach == "mle") {
+      fit <- rstan::optimizing(
+        stanmodels$reg,
+        hessian = hessian,
+        data = stan_data,
+        verbose = FALSE,
+        ...
       )
-
-      if (approach == "mle") {
-        fit <- rstan::optimizing(
-          stanmodels$reg,
-          hessian = hessian,
-          data = stan_data,
-          verbose = FALSE,
-          ...
-        )
-        if (hessian == TRUE) {
-          fit$hessian <- -fit$hessian
-        }
-        fit$par <- fit$theta_tilde[((p + 1):(2 * p))]
-        AIC <- -2 * fit$value + 2 * p
-        fit <- list(fit = fit, logLik = fit$value, AIC = AIC, Delta = Delta)
-      } else {
-        stan_data$approach <- 1
-        fit <- rstan::sampling(
-          stanmodels$reg,
-          data = stan_data,
-          verbose = FALSE,
-          ...
-        )
-        fit <- list(fit = fit)
+      if (hessian == TRUE) {
+        fit$hessian <- -fit$hessian
       }
-
-      fit$mf <- mf
-      fit$n <- n
-      fit$p <- p
-      # fit$x_mean <- x_mean
-      # fit$x_sd <- x_sd
-
-      fit$call <- match.call()
-      fit$formula <- stats::formula(Terms)
-      fit$terms <- stats::terms.formula(formula)
-      fit$labels <- labels
-      fit$approach <- approach
-      fit$link <- link1
-      class(fit) <- "cmpois"
-      return(fit)
+      fit$par <- fit$theta_tilde[((p + 1):(2 * p))]
+      AIC <- -2 * fit$value + 2 * p
+      fit <- list(fit = fit, logLik = fit$value, AIC = AIC, Delta = Delta)
     } else {
-      stan_data <- list(
-        y = y,
-        X = X_std,
-        n = n,
-        p = p,
-        x_mean = x_mean,
-        x_sd = x_sd,
-        mu_beta = hyperpars$mu_beta,
-        sigma_beta = hyperpars$sigma_beta,
-        a_theta = hyperpars$a_theta,
-        b_theta = hyperpars$b_theta,
-        approach = 0,
-        link = Link,
-        dist = 2
+      stan_data$approach <- 1
+      fit <- rstan::sampling(
+        stanmodels$reg,
+        data = stan_data,
+        verbose = FALSE,
+        ...
       )
-
-      if (approach == "mle") {
-        fit <- rstan::optimizing(
-          stanmodels$reg,
-          hessian = hessian,
-          data = stan_data,
-          verbose = FALSE,
-          ...
-        )
-        if (hessian == TRUE) {
-          fit$hessian <- -fit$hessian
-        }
-        fit$par <- fit$theta_tilde[((p + 1):(2 * p))]
-        AIC <- -2 * fit$value + 2 * p
-        fit <- list(fit = fit, logLik = fit$value, AIC = AIC, Delta = Delta)
-      } else {
-        stan_data$approach <- 1
-        fit <- rstan::sampling(
-          stanmodels$reg,
-          data = stan_data,
-          verbose = FALSE,
-          ...
-        )
-        fit <- list(fit = fit)
-      }
-
-      fit$mf <- mf
-      fit$n <- n
-      fit$p <- p
-      # fit$x_mean <- x_mean
-      # fit$x_sd <- x_sd
-
-      fit$call <- match.call()
-      fit$formula <- stats::formula(Terms)
-      fit$terms <- stats::terms.formula(formula)
-      fit$labels <- labels
-      fit$approach <- approach
-      fit$link <- link1
-      class(fit) <- "cmnb"
-      return(fit)
+      fit <- list(fit = fit)
     }
+
+    fit$mf <- mf
+    fit$n <- n
+    fit$p <- p
+    # fit$x_mean <- x_mean
+    # fit$x_sd <- x_sd
+
+    fit$call <- match.call()
+    fit$formula <- stats::formula(Terms)
+    fit$terms <- stats::terms.formula(formula)
+    fit$labels <- labels
+    fit$approach <- approach
+    fit$link <- link
+    class(fit) <- classr
+    return(fit)
   } else {
+    if (family == "poisson") {
+      if (case == "inflated") {
+        classr <- "cmzips"
+      } else {
+        classr <- "cmzaps"
+      }
+    } else {
+      if (case == "inflated") {
+        classr <- "cmzinb"
+      } else {
+        classr <- "cmzanb"
+      }
+    }
+
     link1 <- match.arg(link1)
     link2 <- match.arg(link2)
     formula <- Formula::Formula(formula)
@@ -217,7 +167,7 @@ countmodel <- function(
     n <- nrow(X)
     p <- ncol(X)
     q <- ncol(Z)
-    hyperpars <- hyperpars_aux(hyperpars)
+    hyperpars <- hyperpars_aux(hyperpars, p = p, q = q)
     if (p > 1) {
       if (match("(Intercept)", Xlabels) == 1) {
         X_std <- scale(X[, -1])
@@ -260,316 +210,88 @@ countmodel <- function(
       Delta_z <- diag(n)
     }
 
-    Link1 <- switch(
-      link1,
+    Link2 <- switch(
+      link2,
       "logit" = 1,
       "probit" = 2,
       "cloglog" = 3,
       "cauchy" = 4
     )
 
-    Link2 <- switch(link2, "log" = 1, "sqrt" = 2, "identity" = 3)
+    Link1 <- switch(link1, "log" = 1, "sqrt" = 2, "identity" = 3)
 
-    if (case == "inflated") {
-      if (family == "poisson") {
-        stan_data <- list(
-          y = y,
-          X = X_std,
-          Z = Z_std,
-          n = n,
-          p = p,
-          q = q,
-          x_mean = x_mean,
-          x_sd = x_sd,
-          z_mean = z_mean,
-          z_sd = z_sd,
-          mu_beta = hyperpars$mu_beta,
-          sigma_beta = hyperpars$sigma_beta,
-          mu_psi = hyperpars$mu_psi,
-          sigma_psi = hyperpars$sigma_psi,
-          a_theta = hyperpars$a_theta,
-          b_theta = hyperpars$b_theta,
-          approach = 0,
-          link1 = Link1,
-          link2 = Link2,
-          dist = 1,
-          case = 1
-        )
+    stan_data <- list(
+      y = y,
+      X = X_std,
+      Z = Z_std,
+      n = n,
+      p = p,
+      q = q,
+      x_mean = x_mean,
+      x_sd = x_sd,
+      z_mean = z_mean,
+      z_sd = z_sd,
+      mu_beta = hyperpars$mu_beta,
+      sigma_beta = hyperpars$sigma_beta,
+      mu_psi = hyperpars$mu_psi,
+      sigma_psi = hyperpars$sigma_psi,
+      a_theta = hyperpars$a_theta,
+      b_theta = hyperpars$b_theta,
+      approach = 0,
+      link1 = Link2,
+      link2 = Link1,
+      dist = dist,
+      case_id = case_id
+    )
 
-        if (approach == "mle") {
-          fit <- rstan::optimizing(
-            stanmodels$zereg,
-            hessian = hessian,
-            data = stan_data,
-            verbose = FALSE,
-            ...
-          )
-          if (hessian == TRUE) {
-            fit$hessian <- -fit$hessian
-          }
-          fit$par <- fit$theta_tilde[(p + q + 1):(2 * (p + q))]
-          AIC <- -2 * fit$value + 2 * (p + q)
-          fit <- list(
-            fit = fit,
-            logLik = fit$value,
-            AIC = AIC,
-            Delta = magic::adiag(Delta_z, Delta_x)
-          )
-        } else {
-          stan_data$approach <- 1
-          fit <- rstan::sampling(
-            stanmodels$zereg,
-            data = stan_data,
-            verbose = FALSE,
-            ...
-          )
-          fit <- list(fit = fit)
-        }
-
-        fit$n <- n
-        fit$p <- p
-        fit$q <- q
-        # fit$x_mean <- x_mean
-        # fit$x_sd <- x_sd
-        # fit$z_mean <- z_mean
-        # fit$z_sd <- z_sd
-        # fit$v_sd <- c(z_sd, x_sd)
-
-        fit$call <- match.call()
-        fit$formula <- stats::formula(Terms)
-        fit$terms <- stats::terms.formula(formula)
-        fit$labels1 <- Zlabels
-        fit$labels2 <- Xlabels
-        fit$approach <- approach
-        fit$link1 <- link1
-        fit$link2 <- link2
-        class(fit) <- "cmzipois"
-        return(fit)
-      } else {
-        stan_data <- list(
-          y = y,
-          X = X_std,
-          Z = Z_std,
-          n = n,
-          p = p,
-          q = q,
-          x_mean = x_mean,
-          x_sd = x_sd,
-          z_mean = z_mean,
-          z_sd = z_sd,
-          mu_beta = hyperpars$mu_beta,
-          sigma_beta = hyperpars$sigma_beta,
-          mu_psi = hyperpars$mu_psi,
-          sigma_psi = hyperpars$sigma_psi,
-          a_theta = hyperpars$a_theta,
-          b_theta = hyperpars$b_theta,
-          approach = 0,
-          link1 = Link1,
-          link2 = Link2,
-          dist = 2,
-          case = 1
-        )
-
-        if (approach == "mle") {
-          fit <- rstan::optimizing(
-            stanmodels$zereg,
-            hessian = hessian,
-            data = stan_data,
-            verbose = FALSE,
-            ...
-          )
-          if (hessian == TRUE) {
-            fit$hessian <- -fit$hessian
-          }
-          fit$par <- fit$theta_tilde[(p + q + 1):(2 * (p + q))]
-          AIC <- -2 * fit$value + 2 * (p + q)
-          fit <- list(
-            fit = fit,
-            logLik = fit$value,
-            AIC = AIC,
-            Delta = magic::adiag(Delta_z, Delta_x)
-          )
-        } else {
-          stan_data$approach <- 1
-          fit <- rstan::sampling(
-            stanmodels$zereg,
-            data = stan_data,
-            verbose = FALSE,
-            ...
-          )
-          fit <- list(fit = fit)
-        }
-
-        fit$n <- n
-        fit$p <- p
-        fit$q <- q
-        # fit$x_mean <- x_mean
-        # fit$x_sd <- x_sd
-        # fit$z_mean <- z_mean
-        # fit$z_sd <- z_sd
-        # fit$v_sd <- c(z_sd, x_sd)
-
-        fit$call <- match.call()
-        fit$formula <- stats::formula(Terms)
-        fit$terms <- stats::terms.formula(formula)
-        fit$labels1 <- Zlabels
-        fit$labels2 <- Xlabels
-        fit$approach <- approach
-        fit$link1 <- link1
-        fit$link2 <- link2
-        class(fit) <- "cmzinb"
-        return(fit)
+    if (approach == "mle") {
+      fit <- rstan::optimizing(
+        stanmodels$zereg,
+        hessian = hessian,
+        data = stan_data,
+        verbose = FALSE,
+        ...
+      )
+      if (hessian == TRUE) {
+        fit$hessian <- -fit$hessian
       }
+      fit$par <- fit$theta_tilde[(p + q + 1):(2 * (p + q))]
+      AIC <- -2 * fit$value + 2 * (p + q)
+      fit <- list(
+        fit = fit,
+        logLik = fit$value,
+        AIC = AIC,
+        Delta = magic::adiag(Delta_z, Delta_x)
+      )
     } else {
-      if (family == "poisson") {
-        stan_data <- list(
-          y = y,
-          X = X_std,
-          Z = Z_std,
-          n = n,
-          p = p,
-          q = q,
-          x_mean = x_mean,
-          x_sd = x_sd,
-          z_mean = z_mean,
-          z_sd = z_sd,
-          mu_beta = hyperpars$mu_beta,
-          sigma_beta = hyperpars$sigma_beta,
-          mu_psi = hyperpars$mu_psi,
-          sigma_psi = hyperpars$sigma_psi,
-          a_theta = hyperpars$a_theta,
-          b_theta = hyperpars$b_theta,
-          approach = 0,
-          link1 = Link1,
-          link2 = Link2,
-          dist = 1,
-          case = 2
-        )
-
-        if (approach == "mle") {
-          fit <- rstan::optimizing(
-            stanmodels$zereg,
-            hessian = hessian,
-            data = stan_data,
-            verbose = FALSE,
-            ...
-          )
-          if (hessian == TRUE) {
-            fit$hessian <- -fit$hessian
-          }
-          fit$par <- fit$theta_tilde[(p + q + 1):(2 * (p + q))]
-          AIC <- -2 * fit$value + 2 * (p + q)
-          fit <- list(
-            fit = fit,
-            logLik = fit$value,
-            AIC = AIC,
-            Delta = magic::adiag(Delta_z, Delta_x)
-          )
-        } else {
-          stan_data$approach <- 1
-          fit <- rstan::sampling(
-            stanmodels$zereg,
-            data = stan_data,
-            verbose = FALSE,
-            ...
-          )
-          fit <- list(fit = fit)
-        }
-
-        fit$n <- n
-        fit$p <- p
-        fit$q <- q
-        # fit$x_mean <- x_mean
-        # fit$x_sd <- x_sd
-        # fit$z_mean <- z_mean
-        # fit$z_sd <- z_sd
-        # fit$v_sd <- c(z_sd, x_sd)
-
-        fit$call <- match.call()
-        fit$formula <- stats::formula(Terms)
-        fit$terms <- stats::terms.formula(formula)
-        fit$labels1 <- Zlabels
-        fit$labels2 <- Xlabels
-        fit$approach <- approach
-        fit$link1 <- link1
-        fit$link2 <- link2
-        class(fit) <- "cmzapois"
-        return(fit)
-      } else {
-        stan_data <- list(
-          y = y,
-          X = X_std,
-          Z = Z_std,
-          n = n,
-          p = p,
-          q = q,
-          x_mean = x_mean,
-          x_sd = x_sd,
-          z_mean = z_mean,
-          z_sd = z_sd,
-          mu_beta = hyperpars$mu_beta,
-          sigma_beta = hyperpars$sigma_beta,
-          mu_psi = hyperpars$mu_psi,
-          sigma_psi = hyperpars$sigma_psi,
-          a_theta = hyperpars$a_theta,
-          b_theta = hyperpars$b_theta,
-          approach = 0,
-          link1 = Link1,
-          link2 = Link2,
-          dist = 2,
-          case = 2
-        )
-
-        if (approach == "mle") {
-          fit <- rstan::optimizing(
-            stanmodels$zereg,
-            hessian = hessian,
-            data = stan_data,
-            verbose = FALSE,
-            ...
-          )
-          if (hessian == TRUE) {
-            fit$hessian <- -fit$hessian
-          }
-          fit$par <- fit$theta_tilde[(p + q + 1):(2 * (p + q))]
-          AIC <- -2 * fit$value + 2 * (p + q)
-          fit <- list(
-            fit = fit,
-            logLik = fit$value,
-            AIC = AIC,
-            Delta = magic::adiag(Delta_z, Delta_x)
-          )
-        } else {
-          stan_data$approach <- 1
-          fit <- rstan::sampling(
-            stanmodels$zereg,
-            data = stan_data,
-            verbose = FALSE,
-            ...
-          )
-          fit <- list(fit = fit)
-        }
-
-        fit$n <- n
-        fit$p <- p
-        fit$q <- q
-        # fit$x_mean <- x_mean
-        # fit$x_sd <- x_sd
-        # fit$z_mean <- z_mean
-        # fit$z_sd <- z_sd
-        # fit$v_sd <- c(z_sd, x_sd)
-
-        fit$call <- match.call()
-        fit$formula <- stats::formula(Terms)
-        fit$terms <- stats::terms.formula(formula)
-        fit$labels1 <- Zlabels
-        fit$labels2 <- Xlabels
-        fit$approach <- approach
-        fit$link1 <- link1
-        fit$link2 <- link2
-        class(fit) <- "cmzanb"
-        return(fit)
-      }
+      stan_data$approach <- 1
+      fit <- rstan::sampling(
+        stanmodels$zereg,
+        data = stan_data,
+        verbose = FALSE,
+        ...
+      )
+      fit <- list(fit = fit)
     }
+
+    fit$n <- n
+    fit$p <- p
+    fit$q <- q
+    # fit$x_mean <- x_mean
+    # fit$x_sd <- x_sd
+    # fit$z_mean <- z_mean
+    # fit$z_sd <- z_sd
+    # fit$v_sd <- c(z_sd, x_sd)
+
+    fit$call <- match.call()
+    fit$formula <- stats::formula(Terms)
+    fit$terms <- stats::terms.formula(formula)
+    fit$labels1 <- Zlabels
+    fit$labels2 <- Xlabels
+    fit$approach <- approach
+    fit$link1 <- link1
+    fit$link2 <- link2
+    class(fit) <- classr
+    return(fit)
   }
 }

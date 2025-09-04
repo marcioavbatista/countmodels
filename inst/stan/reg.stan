@@ -22,7 +22,7 @@ data{
 
 parameters{
   vector[p] beta_std;
-  array[dist == 2 ? 0:1] real <lower=0> theta;
+  real <lower=0> theta;
 }
 
 transformed parameters{

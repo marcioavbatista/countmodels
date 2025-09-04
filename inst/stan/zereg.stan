@@ -14,7 +14,7 @@ data {
   int link1;
   int link2;
   int<lower=1, upper = 2> dist;
-  int<lower=1, upper = 2> case;
+  int<lower=1, upper = 2> case_id;
   row_vector[p] x_mean;
   vector<lower=0>[p] x_sd;
   row_vector[q] z_mean;
@@ -31,7 +31,7 @@ data {
 parameters {
   vector[q] psi_std;
   vector[p] beta_std;
-  array[dist == 2 ? 0:1] real <lower=0> theta; 
+  real <lower=0> theta; 
 }
 
 transformed parameters{
@@ -69,7 +69,7 @@ model{
 
 
     if(dist == 1){
-        if(case == 1){
+        if(case_id == 1){
             target += sum(loglik_zipoisson(y, X, Z, beta_std, psi_std, link1, link2));
         }else{
             target += sum(loglik_zapoisson(y, X, Z, beta_std, psi_std, link1, link2));
@@ -78,7 +78,7 @@ model{
         
         
     } else{
-        if(case == 1){
+        if(case_id == 1){
             target += sum(loglik_zinegbin(y, X, Z, beta_std, psi_std,theta, link1, link2));
         }else{
             target += sum(loglik_zanegbin(y, X, Z, beta_std, psi_std,theta, link1, link2));
@@ -94,7 +94,7 @@ generated quantities{
     vector[n] loglik;
 
     if(dist == 1){
-        if(case == 1){
+        if(case_id == 1){
             loglik = loglik_zipoisson(y, X, Z, beta_std, psi_std, link1, link2);
         }else{
             loglik = loglik_zapoisson(y, X, Z, beta_std, psi_std, link1, link2);
@@ -103,7 +103,7 @@ generated quantities{
         
         
     } else{
-        if(case == 1){
+        if(case_id == 1){
             loglik = loglik_zinegbin(y, X, Z, beta_std, psi_std,theta, link1, link2);
         }else{
             loglik = loglik_zanegbin(y, X, Z, beta_std, psi_std,theta, link1, link2);

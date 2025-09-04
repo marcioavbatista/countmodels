@@ -11,9 +11,8 @@ vector loglik_poisson(array[] int y, matrix X, vector beta, int link1){
 return lprob;
 }
 
-vector loglik_negbin(array[] int y, matrix X, vector beta, array [] real theta1, int link1){
+vector loglik_negbin(array[] int y, matrix X, vector beta,real theta, int link1){
   int n = num_elements(y);
-  real theta = theta1[1]; 
   vector[n] lprob;
   vector[n] lp1 = X*beta;
   vector[n] mu = linkinv_poisson(lp1, link1);
@@ -71,9 +70,8 @@ return lprob;
 }
 
 
-vector loglik_zinegbin(array[] int y, matrix X, matrix Z, vector beta, vector psi, array [] real theta1 ,int link1,int link2){
-  int n = num_elements(y);
-  real theta = theta1[1]; 
+vector loglik_zinegbin(array[] int y, matrix X, matrix Z, vector beta, vector psi, real theta ,int link1,int link2){
+  int n = num_elements(y); 
   vector[n] lprob;
   vector[n] lp1 = X*beta;
   vector[n] lp2 = Z*psi;
@@ -94,9 +92,8 @@ vector loglik_zinegbin(array[] int y, matrix X, matrix Z, vector beta, vector ps
 return lprob;
 }
 
-vector loglik_zanegbin(array[] int y, matrix X, matrix Z, vector beta, vector psi, array [] real theta1 , int link1,int link2){
-  int n = num_elements(y);
-  real theta = theta1[1]; 
+vector loglik_zanegbin(array[] int y, matrix X, matrix Z, vector beta, vector psi, real theta , int link1,int link2){
+  int n = num_elements(y); 
   vector[n] lprob;
   vector[n] lp1 = X*beta;
   vector[n] lp2 = Z*psi;
