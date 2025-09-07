@@ -33,21 +33,15 @@ jobs:
       # 4️⃣ Instala dependências
       - name: Install R dependencies
         run: |
-          Rscript -e '
-
-          cran_deps <- c("RcppParallel", "rstan", "rstantools", "BH", "RcppEigen", "StanHeaders", "devtools", "drat", "rcmdcheck")
-          
-          # Instala TODOS do CRAN
-          for (pkg in cran_deps) {
-            if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
-              install.packages(pkg)
-              # Força instalação se ainda não estiver disponível
-              if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
-                stop("Failed to install: ", pkg)
-              }
-            }
-          }
-          '
+             Rscript -e "install.packages('RcppParallel')"
+             Rscript -e "install.packages('rstan')"
+             Rscript -e "install.packages('rstantools')"
+             Rscript -e "install.packages('BH')"
+             Rscript -e "install.packages('RcppEigen')"
+             Rscript -e "install.packages('StanHeaders')"
+             Rscript -e "install.packages('devtools')"
+             Rscript -e "install.packages('drat')"
+             Rscript -e "install.packages('rcmdcheck')"
 
       # 5️⃣ Cria o pacote source
       - name: Build package source
