@@ -56,8 +56,7 @@ jobs:
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(file = pkg, repodir = "countmodels/marcio-lib",
-          commit = T, pullfirst = T, action = "prune",
-          location = "docs/")
+          commit = T, pullfirst = T, action = "prune")
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
           Rscript insert_to_drat.R
