@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
       # 1️⃣ Clona o repositório do pacote (countmodels)
@@ -37,8 +37,27 @@ jobs:
 
       # 5️⃣ Cria o pacote source
       - name: Build package source
-        run: Rscript -e 'devtools::build()'
-  
+        run: |
+          Rscript -e 'devtools::build()'
+          Rscript -e 'devtools::build(binary = T)'
+
+      # 6️⃣ Insere pacote no drat (Linux/macOS → bash)
+      - name: Insert package to drat (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          cat > insert_to_drat.R <<'RSCRIPT'
+          library(drat)
+          original_dir <- getwd()
+          setwd("..")
+          files <- list.files(full.names = TRUE)
+          pkg <- files[endsWith(files, c(".tar.gz", ".tgz"))]
+          if (length(pkg) == 0) stop("No tar.gz found")
+          insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
+          commit = T)
+          RSCRIPT
+          Rscript insert_to_drat.R
       
       # 7️⃣ Insere pacote no drat (Windows → PowerShell)
       - name: Insert package to drat (Windows)
@@ -53,11 +72,12 @@ jobs:
           setwd("..")
           files <- list.files(full.names = TRUE)
           cat(files)
-          pkg <- files[endsWith(files, ".tar.gz")]
+          pkg <- files[endsWith(files, c(".tar.gz",".zip"))]
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
-          commit = T, pullfirst = T, action = "prune")
+          commit = T)
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
           Rscript insert_to_drat.R
+
