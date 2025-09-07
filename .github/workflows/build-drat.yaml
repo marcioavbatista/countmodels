@@ -44,7 +44,6 @@ jobs:
       - name: Insert package to drat (Unix)
         if: runner.os != 'Windows'
         run: |
-          cd marcio-lib
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           cat > insert_to_drat.R <<'RSCRIPT'
@@ -53,7 +52,7 @@ jobs:
           pkg <- files[endsWith(files, ".tar.gz")]
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(pkg,
-                        repodir = "drat",
+                        repodir = "marcio-lib/drat",
                         commit = TRUE, push = TRUE,
                         binarize = TRUE)
           RSCRIPT
@@ -64,7 +63,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          cd marcio-lib
           git config --global user.email 'actions@github.com'
           git config --global user.name 'GitHub Actions'
           $r = @'
@@ -73,7 +71,7 @@ jobs:
           pkg <- files[endsWith(files, ".tar.gz")]
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(pkg,
-                        repodir = "../marcio-lib/drat",
+                        repodir = "marcio-lib/drat",
                         commit = TRUE, push = TRUE,
                         binarize = TRUE)
           '@
