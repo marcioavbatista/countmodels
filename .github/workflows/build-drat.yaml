@@ -54,10 +54,16 @@ jobs:
           pkg <- files[endsWith(files, ".tar.gz")]
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
-          insertPackage(pkg,
-                        repodir = "countmodels/marcio-lib/drat",
-                        commit = TRUE, push = TRUE,
-                        binarize = TRUE)
+          insertPackage(
+          pkg,
+          repodir = "countmodels/marcio-lib/drat",
+          commit = TRUE)
+
+          insertPackage(
+          pkg,
+          repodir = "countmodels/marcio-lib/drat",
+          commit = TRUE,
+          action = "prune")
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
           Rscript insert_to_drat.R
