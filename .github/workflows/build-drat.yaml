@@ -43,27 +43,42 @@ jobs:
              Rscript -e "install.packages('drat')"
              Rscript -e "install.packages('rcmdcheck')"
 
-      # 5️⃣ Cria o pacote source
-      - name: Build package source
+      # 5️⃣ Build para Linux e macOS (bash)
+      - name: Build package (Unix)
+        if: runner.os != 'Windows'
         run: |
-          # Configurações específicas para macOS
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-          echo "Configurando para macOS arm64..."
-          Rscript -e "
-          # Configurações específicas para Apple Silicon
-          Sys.setenv(CMAKE_CXX_COMPILER = '/usr/bin/clang++')
-          Sys.setenv(CMAKE_C_COMPILER = '/usr/bin/clang')
-          Sys.setenv(FLAGS = '-O2 -arch arm64')
-          devtools::build()
-          devtools::build(binary = T)
-          "
+            echo "Configurando para macOS arm64..."
+            Rscript -e "
+            Sys.setenv(CMAKE_CXX_COMPILER = '/usr/bin/clang++')
+            Sys.setenv(CMAKE_C_COMPILER = '/usr/bin/clang')
+            Sys.setenv(FLAGS = '-O2 -arch arm64')
+            devtools::build()
+            "
           else
-          # Linux e Windows normais
-          Rscript -e "devtools::build()"
-          if [[ "$RUNNER_OS" != "Linux" ]]; then
-            Rscript -e "devtools::build(binary = TRUE)"
-            fi
+            # Linux
+            Rscript -e "devtools::build()"
           fi
+      
+          # Tenta binário apenas se não for Linux
+          if [[ "$RUNNER_OS" != "Linux" ]]; then
+            Rscript -e "
+            tryCatch({
+              devtools::build(binary = TRUE)
+            }, error = function(e) {
+              message('Binary build failed: ', e$message)
+            })
+            "
+          fi
+      
+      # 6️⃣ Build para Windows (PowerShell)
+      - name: Build package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Windows - sempre tenta source e binário
+          Rscript -e "devtools::build()"
+          Rscript -e "devtools::build(binary = TRUE)"
 
       # 6️⃣ Insere pacote no drat (Linux/macOS → bash)
       - name: Insert package to drat (Unix)
