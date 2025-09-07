@@ -49,7 +49,7 @@ jobs:
           $r = @'
           library(drat)
           files <- list.files(full.names = TRUE)
-          pkg <- files[endsWith(files, ".tar.gz")]
+          pkg <- files[endsWith(files, ".zip")]
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(pkg,
                         repodir = "marcio-lib/drat",
