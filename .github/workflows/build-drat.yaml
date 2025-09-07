@@ -1,0 +1,56 @@
+name: Build and publish R packages to drat
+
+on:
+  push:
+    branches: [ main ]    # (*nome) substituir se usar outra branch
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      # 1️⃣ Clona seu repositório do pacote
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      # 2️⃣ Instala R
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+
+      # 3️⃣ Instala dependências
+      - name: Install R dependencies
+        run: |
+          install.packages(c("devtools","drat","rcmdcheck"))
+
+      # 4️⃣ Cria o pacote source (.tar.gz)
+      - name: Build package source
+        run: R CMD build .   # assume que o diretório atual é o pacote (*nome se necessário)
+
+      # 5️⃣ Inserir pacote source e binários no drat
+      - name: Insert package to drat
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          Rscript -e "
+            library(drat);
+            # Inserir source
+            insertPackage(
+              list.files(pattern='\\.tar\\.gz$', full.names=TRUE),
+              repodir='../marcio-lib/drat',            # (*nome) pasta do seu repositório drat
+              commit=TRUE, push=TRUE
+            );
+            # Inserir binários
+            insertPackage(
+              list.files(pattern='\\.tar\\.gz$', full.names=TRUE),
+              repodir='../marcio-lib/drat',
+              binarize=TRUE,
+              commit=TRUE, push=TRUE
+            )
+          "
