@@ -1,4 +1,4 @@
-#'@export
+#@export
 print.summary.cmnb <- function(x, ...) {
   if (x$approach == "mle") {
     cat("Call:\n")
