@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: marcioavbatista/marcio-lib
-          path: marcio-lib          # 👈 dentro do workspace
+          path: ./marcio-lib          # 👈 dentro do workspace
           token: ${{ secrets.PERSONAL_TOKEN }}
 
       # 3️⃣ Instala R
@@ -37,7 +37,7 @@ jobs:
 
       # 5️⃣ Cria o pacote source
       - name: Build package source
-        run: Rscript -e 'system("R CMD build .")'
+        run: Rscript -e 'devtools::build()'
 
 
         # 6️⃣ Insere pacote no drat (Linux/macOS → bash)
