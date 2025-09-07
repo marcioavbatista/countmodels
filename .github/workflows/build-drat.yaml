@@ -26,8 +26,8 @@ jobs:
 
       # 3️⃣ Instala dependências
       - name: Install R dependencies
-        run: Rscript -e "
-          install.packages(c("devtools","drat","rcmdcheck"))"
+        run: |
+          Rscript -e 'install.packages(c("devtools","drat","rcmdcheck"))'
 
       # 4️⃣ Cria o pacote source (.tar.gz)
       - name: Build package source
