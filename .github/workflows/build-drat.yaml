@@ -55,7 +55,7 @@ jobs:
           pkg <- files[endsWith(files, ".tar.gz")]
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
-          insertPackage(file, repodir = "countmodels/marcio-lib",
+          insertPackage(file = pkg, repodir = "countmodels/marcio-lib",
           commit = T, pullfirst = T, action = "prune",
           location = "docs/")
           '@
