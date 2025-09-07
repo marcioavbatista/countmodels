@@ -60,4 +60,4 @@ jobs:
                         binarize = TRUE)
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
-          Rscript insert_to_drat.R
+          Rscript countmodels/insert_to_drat.R
