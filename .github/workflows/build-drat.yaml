@@ -91,7 +91,9 @@ jobs:
           original_dir <- getwd()
           setwd("..")
           files <- list.files(full.names = TRUE)
-          pkg <- files[endsWith(files, c(".tar.gz", ".tgz"))]
+          tar_files <- files[endsWith(files, ".tar.gz")]
+          tgz_files <- files[endsWith(files, ".tgz")]
+          pkg <- c(tar_files, tgz_files)
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
           commit = T, location = "docs/")
@@ -111,7 +113,9 @@ jobs:
           setwd("..")
           files <- list.files(full.names = TRUE)
           cat(files)
-          pkg <- files[endsWith(files, c(".tar.gz",".zip"))]
+          tar_files <- files[endsWith(files, ".tar.gz")]
+          tgz_files <- files[endsWith(files, ".zip")]
+          pkg <- c(tar_files, tgz_files)
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
