@@ -31,7 +31,7 @@ jobs:
 
       # 4️⃣ Cria o pacote source (.tar.gz)
       - name: Build package source
-        run: R CMD build .   # assume que o diretório atual é o pacote (*nome se necessário)
+        run: Rscript -e 'system("R CMD build .")'   # assume que o diretório atual é o pacote (*nome se necessário)
 
       # 5️⃣ Inserir pacote source e binários no drat
       - name: Insert package to drat
