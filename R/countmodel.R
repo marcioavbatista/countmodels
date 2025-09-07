@@ -1,4 +1,41 @@
-#'@export
+#--------------------------------------------------
+#' Regression for count models
+#' @export
+#' @aliases countmodel
+#' @description
+#' Fits an regression model for poisson and  Negative Binomial an their inflated
+#'  and hurdle versions
+#'
+#' @param formula an object of class "formula" (or one that can be coerced to
+#' that class): a symbolic description of the model to be fitted.
+#' @param family family distribution for the regression model (poisson, negbinom)
+#' ; default is poisson
+#' @param case case of the regression (standard, inflated, hurdle); default is
+#'  standard
+#' @param data data an optional data.frame, list or enviroment containing the
+#' variables in the model
+#' @param approach approach to be used to fit the model (mle: maximum likelihood;
+#'  bayes : Bayesian approach); default is mle
+#' @param hessian logical ; if TRUE (default), the hessian matrix is returned
+#' when approach = "mle"
+#' @param link2 assumed link function for degenerate distribution (logit, probit,
+#'  cloglog, cauchy); default is logit.
+#' @param link1 assumed link function for count distribution (log, sqrt or
+#' identiy); default is log.
+#' @param hyperparsa list containing the hyperparameters associated with the
+#' prior distribution of the regression coefficients;
+#'  if not specified then default choice is an minor informative prior
+#' @param ... further arguments
+#'
+#' @returns an object of class (cms,cmai,cmps,cmnb,cmzips,cmzaps,cmzinb,cmzanb)
+#' depending on the family and case used
+#'
+#'
+#' @examples
+#'
+#'
+#'
+#--------------------------------------------------
 countmodel <- function(
   formula,
   family = c("poisson", "negbinom"),

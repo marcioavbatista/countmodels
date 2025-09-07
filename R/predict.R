@@ -1,4 +1,21 @@
-#'@export
+
+#---------------------------------------------
+#'  Predict and Confidence intervals of mean for newdata
+#'
+#' @aliases predict.cms
+#' @export
+#' @param object an object of the class cms
+#' @param newdata an matrix or data.frame with all the covariables used in the model
+#' referring to the new observations
+#' @param level the confidence level required
+#' @param type of the confidence interval ("link", "response", "terms");
+#'  default is type = "link" **(in development, for now forces use of lik intervals)
+#' @param ... further arguments passed to or from other methods
+#' @return  A matrix (or vector) with columns giving lower and upper confidence
+#' limits for each observation.
+#'
+#'
+#----------------------------------------------
 predict.cms <- function(
   object,
   newdata,
@@ -56,7 +73,23 @@ predict.cms <- function(
 }
 
 
-#'@export
+#---------------------------------------------
+#'  Predict and Confidence intervals of mean for newdata
+#'
+#' @aliases predict.cmai
+#' @export
+#' @param object an object of the class cmai
+#' @param newdata an matrix or data.frame with all the covariables used in the model
+#' referring to the new observations
+#' @param level the confidence level required
+#' @param type of the confidence interval ("link", "response", "terms");
+#'  default is type = "link" **(in development, for now forces use of lik intervals)
+#' @param ... further arguments passed to or from other methods
+#' @return  A matrix (or vector) with columns giving lower and upper confidence
+#' limits for each observation.
+#'
+#'
+#----------------------------------------------
 predict.cmai <- function(
   object,
   newdata,
