@@ -39,14 +39,42 @@ jobs:
       - name: Build package source
         run: R CMD build .
 
-      # 6️⃣ Insere pacote no repositório drat
-      - name: Insert package to drat
+        # 6️⃣ Insere pacote no drat (Linux/macOS → bash)
+      - name: Insert package to drat (Unix)
+        if: runner.os != 'Windows'
         run: |
           cd marcio-lib
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
-          Rscript -e 'library(drat);
-            pkg <- list.files("../", pattern="\\.tar\\.gz$", full.names=TRUE)
-            insertPackage(pkg,
-                          repodir=".",
-                          commit=TRUE, push=TRUE)'
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          cat > insert_to_drat.R <<'RSCRIPT'
+          library(drat)
+          files <- list.files(full.names = TRUE)
+          pkg <- files[endsWith(files, ".tar.gz")]
+          if (length(pkg) == 0) stop("No tar.gz found")
+          insertPackage(pkg,
+                        repodir = "drat",
+                        commit = TRUE, push = TRUE,
+                        binarize = TRUE)
+          RSCRIPT
+          Rscript insert_to_drat.R
+
+      # 7️⃣ Insere pacote no drat (Windows → PowerShell)
+      - name: Insert package to drat (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cd marcio-lib
+          git config --global user.email 'actions@github.com'
+          git config --global user.name 'GitHub Actions'
+          $r = @'
+          library(drat)
+          files <- list.files(full.names = TRUE)
+          pkg <- files[endsWith(files, ".tar.gz")]
+          if (length(pkg) == 0) stop("No tar.gz found")
+          insertPackage(pkg,
+                        repodir = "../marcio-lib/drat",
+                        commit = TRUE, push = TRUE,
+                        binarize = TRUE)
+          '@
+          $r | Out-File -Encoding UTF8 insert_to_drat.R
+          Rscript insert_to_drat.R
