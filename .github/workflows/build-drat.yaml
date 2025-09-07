@@ -38,7 +38,16 @@ jobs:
       # 5️⃣ Cria o pacote source
       - name: Build package source
         run: Rscript -e 'devtools::build()'
-
+  
+      - name: Check git status
+        shell: pwsh
+        run: |
+          cd marcio-lib
+          git status
+          git log --oneline -5
+          ls -la drat/src/contrib/
+    
+      
       # 7️⃣ Insere pacote no drat (Windows → PowerShell)
       - name: Insert package to drat (Windows)
         if: runner.os == 'Windows'
