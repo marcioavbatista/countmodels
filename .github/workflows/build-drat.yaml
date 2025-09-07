@@ -45,17 +45,18 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          cd ..
           git config --global user.email 'actions@github.com'
           git config --global user.name 'GitHub Actions'
           $r = @'
           library(drat)
+          original_dir <- getwd()
+          setwd("..")
           files <- list.files(full.names = TRUE)
           cat(files)
           pkg <- files[endsWith(files, ".tar.gz")]
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
-          insertPackage(file = pkg, repodir = "countmodels/marcio-lib",
+          insertPackage(file = pkg, repodir = "paste0(original_dir,"/marcio-lib")",
           commit = T, pullfirst = T, action = "prune")
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
