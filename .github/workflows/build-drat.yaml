@@ -56,7 +56,7 @@ jobs:
           pkg <- files[endsWith(files, ".tar.gz")]
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
-          insertPackage(file = pkg, repodir = "paste0(original_dir,"/marcio-lib")",
+          insertPackage(file = pkg, repodir = "file.path(original_dir,"marcio-lib")",
           commit = T, pullfirst = T, action = "prune")
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
