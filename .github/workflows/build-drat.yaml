@@ -46,8 +46,24 @@ jobs:
       # 5️⃣ Cria o pacote source
       - name: Build package source
         run: |
-          Rscript -e 'devtools::build()'
-          Rscript -e 'devtools::build(binary = T)'
+          # Configurações específicas para macOS
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+          echo "Configurando para macOS arm64..."
+          Rscript -e "
+          # Configurações específicas para Apple Silicon
+          Sys.setenv(CMAKE_CXX_COMPILER = '/usr/bin/clang++')
+          Sys.setenv(CMAKE_C_COMPILER = '/usr/bin/clang')
+          Sys.setenv(FLAGS = '-O2 -arch arm64')
+          devtools::build()
+          devtools::build(binary = T)
+          "
+          else
+          # Linux e Windows normais
+          Rscript -e "devtools::build()"
+          if [[ "$RUNNER_OS" != "Linux" ]]; then
+            Rscript -e "devtools::build(binary = TRUE)"
+            fi
+          fi
 
       # 6️⃣ Insere pacote no drat (Linux/macOS → bash)
       - name: Insert package to drat (Unix)
@@ -63,7 +79,7 @@ jobs:
           pkg <- files[endsWith(files, c(".tar.gz", ".tgz"))]
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
-          commit = T)
+          commit = T, location = "docs/")
           RSCRIPT
           Rscript insert_to_drat.R
       
@@ -84,7 +100,7 @@ jobs:
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
-          commit = T)
+          commit = T, location = "docs/")
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
           Rscript insert_to_drat.R
