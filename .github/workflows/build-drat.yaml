@@ -37,7 +37,8 @@ jobs:
 
       # 5️⃣ Cria o pacote source
       - name: Build package source
-        run: R CMD build .
+        run: Rscript -e 'system("R CMD build .")'
+
 
         # 6️⃣ Insere pacote no drat (Linux/macOS → bash)
       - name: Insert package to drat (Unix)
