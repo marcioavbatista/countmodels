@@ -55,10 +55,9 @@ jobs:
           pkg <- files[endsWith(files, ".tar.gz")]
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
-          archivePackages(repopath = "countmodels/marcio-lib",
-          type = c("source", "binary", "mac.binary", "mac.binary.big-sur-x86_64",
-          "mac.binary.big-sur-arm64", "mac.binary.el-capitan", "mac.binary.mavericks",
-          "win.binary", "both"), pkg, version = getRversion())
+          insertPackage(file, repodir = "countmodels/marcio-lib",
+          commit = T, pullfirst = T, action = "prune",
+          location = "docs/")
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
           Rscript insert_to_drat.R
