@@ -1,8 +1,8 @@
-name: Build and publish R packages to drat
+name: Build and publish R package to drat
 
 on:
   push:
-    branches: [ main ]    # (*nome) substituir se usar outra branch
+    branches: [ main ]
   release:
     types: [published]
 
@@ -11,40 +11,69 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-      # 1️⃣ Clona seu repositório do pacote
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
+      # 1️⃣ Clona o repositório do PACOTE (countmodels)
+      - name: Checkout package repo
+        uses: actions/checkout@v4
 
-      # 2️⃣ Instala R
+      # 2️⃣ Clona o repositório DRAT (marcio-lib)
+      - name: Checkout drat repo
+        uses: actions/checkout@v4
+        with:
+          repository: marcioavbatista/marcio-lib
+          path: ../marcio-lib
+          token: ${{ secrets.PERSONAL_TOKEN }}
+
+      # 3️⃣ Instala R
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
 
-      # 3️⃣ Instala dependências
+      # 4️⃣ Instala dependências
       - name: Install R dependencies
         run: |
           Rscript -e 'install.packages(c("devtools","drat","rcmdcheck"))'
 
-      # 4️⃣ Cria o pacote source (.tar.gz)
+      # 5️⃣ Cria o pacote fonte (.tar.gz)
       - name: Build package source
-        run: Rscript -e 'system("R CMD build .")'   # assume que o diretório atual é o pacote (*nome se necessário)
+        run: Rscript -e 'devtools::build(path = ".")'
 
-      # 5️⃣ Inserir pacote source e binários no drat
-      - name: Insert package to drat
+      # 6️⃣ Insere pacote no drat (Linux/macOS → bash)
+      - name: Insert package to drat (Unix)
+        if: runner.os != 'Windows'
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          Rscript -e 'library(drat);
-            pkg <- list.files(pattern="\\.tar\\.gz$", full.names=TRUE)
-            insertPackage(pkg,
-                          repodir="../marcio-lib/drat",
-                          commit=TRUE, push=TRUE)
-            insertPackage(pkg,
-                          repodir="../marcio-lib/drat",
-                          binarize=TRUE,
-                          commit=TRUE, push=TRUE)'
+          cat > insert_to_drat.R <<'RSCRIPT'
+          library(drat)
+          files <- list.files(full.names = TRUE)
+          pkg <- files[endsWith(files, ".tar.gz")]
+          if (length(pkg) == 0) stop("No .tar.gz found")
+          insertPackage(pkg,
+                        repodir = "../marcio-lib/drat",
+                        commit = TRUE, push = TRUE,
+                        binarize = TRUE)
+          RSCRIPT
+          Rscript insert_to_drat.R
 
+      # 7️⃣ Insere pacote no drat (Windows → PowerShell)
+      - name: Insert package to drat (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          git config --global user.email 'actions@github.com'
+          git config --global user.name 'GitHub Actions'
+          $r = @'
+          library(drat)
+          files <- list.files(full.names = TRUE)
+          pkg <- files[endsWith(files, ".tar.gz")]
+          if (length(pkg) == 0) stop("No .tar.gz found")
+          insertPackage(pkg,
+                        repodir = "../marcio-lib/drat",
+                        commit = TRUE, push = TRUE,
+                        binarize = TRUE)
+          '@
+          $r | Out-File -Encoding UTF8 insert_to_drat.R
+          Rscript insert_to_drat.R
