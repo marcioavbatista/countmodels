@@ -89,26 +89,3 @@ model{
 }
 
 
-generated quantities{
-
-    vector[n] loglik;
-
-    if(dist == 1){
-        if(case_id == 1){
-            loglik = loglik_zipoisson(y, X, Z, beta_std, psi_std, link1, link2);
-        }else{
-            loglik = loglik_zapoisson(y, X, Z, beta_std, psi_std, link1, link2);
-        }
-        
-        
-        
-    } else{
-        if(case_id == 1){
-            loglik = loglik_zinegbin(y, X, Z, beta_std, psi_std,theta, link1, link2);
-        }else{
-            loglik = loglik_zanegbin(y, X, Z, beta_std, psi_std,theta, link1, link2);
-        }
-        
-    }
-}
-

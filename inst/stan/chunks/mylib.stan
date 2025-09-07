@@ -37,7 +37,7 @@ vector loglik_zipoisson(array[] int y, matrix X, matrix Z, vector beta, vector p
 
   for(i in 1:n){
     if(y[i] == 0){
-      lprob[i] = log_sum_exp(log(omega[i]) , (bernoulli_lpmf(1|omega[i])) + poisson_lpmf(y[i] | mu[i]));
+      lprob[i] = log_sum_exp(log(omega[i]) , log1m(omega[i]) + poisson_lpmf(y[i] | mu[i]));
     }else{
       lprob[i] = log1m(omega[i]) + poisson_lpmf(y[i] | mu[i]);
     }
@@ -81,7 +81,7 @@ vector loglik_zinegbin(array[] int y, matrix X, matrix Z, vector beta, vector ps
 
   for(i in 1:n){
     if(y[i] == 0){
-      lprob[i] = log_sum_exp(log(omega[i]) , (bernoulli_lpmf(1|omega[i])) + neg_binomial_lpmf(y[i]| alpha[i], theta));
+      lprob[i] = log_sum_exp(log(omega[i]) , log1m(omega[i]) + neg_binomial_lpmf(y[i]| alpha[i], theta));
     }else{
       lprob[i] = log1m(omega[i]) + neg_binomial_lpmf(y[i] | alpha[i], theta);
     }

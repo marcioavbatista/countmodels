@@ -56,12 +56,3 @@ model{
 
 }
 
-generated quantities{
-  if(dist == 1) {
-    vector[n] log_lik = loglik_poisson(y, X, beta, link);
-  } else{
-    vector[n] log_lik = loglik_negbin(y, X, beta, theta,link);
-  }
-
-}
-

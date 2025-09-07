@@ -19,35 +19,40 @@ countmodel <- function(
   ...
 ) {
   hyperpars_aux <- function(hyperpars, p = NULL, q = NULL, simp = FALSE) {
-    for (nome in names(hyperpars)) {
-      # Só altera se o valor atual for NULL
-      if (is.null(hyperpars[[nome]])) {
-        if (simp) {
-          if (grepl("mu_beta", nome)) {
-            hyperpars[[nome]] <- rep(0, p)
-          } else if (grepl("sigma_beta", nome)) {
-            hyperpars[[nome]] <- diag(10, p, p)
-          } else if (grepl("a|b", nome)) {
-            hyperpars[[nome]] <- 0.01
-          }
-        } else {
-          # caso completo
-          if (grepl("mu_beta", nome)) {
-            hyperpars[[nome]] <- rep(0, p)
-          } else if (grepl("sigma_beta", nome)) {
-            hyperpars[[nome]] <- diag(10, p, p)
-          } else if (grepl("mu_psi", nome)) {
-            hyperpars[[nome]] <- rep(0, q)
-          } else if (grepl("sigma_psi", nome)) {
-            hyperpars[[nome]] <- diag(10, q, q)
-          } else if (grepl("a|b", nome)) {
-            hyperpars[[nome]] <- 0.01
-          }
-        }
+    hp <- hyperpars # cópia local
+    names_hp <- names(hp)
+
+    # defaults comuns
+    default_a_b <- 0.01
+    default_sigma_diag_p <- function() diag(10, p, p)
+    default_sigma_diag_q <- function() diag(10, q, q)
+    default_mu_beta <- function() rep(0, p)
+    default_mu_psi <- function() rep(0, q)
+
+    if ("mu_beta" %in% names_hp && is.null(hp$mu_beta)) {
+      hp$mu_beta <- default_mu_beta()
+    }
+    if ("sigma_beta" %in% names_hp && is.null(hp$sigma_beta)) {
+      hp$sigma_beta <- default_sigma_diag_p()
+    }
+    if ("a_theta" %in% names_hp && is.null(hp$a_theta)) {
+      hp$a_theta <- default_a_b
+    }
+    if ("b_theta" %in% names_hp && is.null(hp$b_theta)) {
+      hp$b_theta <- default_a_b
+    }
+
+    # quando existe psi (modelos zereg)
+    if (!simp) {
+      if ("mu_psi" %in% names_hp && is.null(hp$mu_psi)) {
+        hp$mu_psi <- default_mu_psi()
+      }
+      if ("sigma_psi" %in% names_hp && is.null(hp$sigma_psi)) {
+        hp$sigma_psi <- default_sigma_diag_q()
       }
     }
 
-    return(hyperpars)
+    return(hp)
   }
   case <- match.arg(case)
   dist <- switch(family, "poisson" = 1, "negbinom" = 2)
@@ -56,7 +61,7 @@ countmodel <- function(
   family <- match.arg(family)
 
   if (case == "standard") {
-    classr <- switch(family, "poisson" = "cmps", "negbin" = "cmnb")
+    classr <- switch(family, "poisson" = "cmps", "negbinom" = "cmnb")
 
     link <- match.arg(link1)
     mf <- stats::model.frame(formula = formula, data = data)
@@ -111,7 +116,7 @@ countmodel <- function(
       if (hessian == TRUE) {
         fit$hessian <- -fit$hessian
       }
-      fit$par <- fit$theta_tilde[((p + 1):(2 * p))]
+      fit$par <- fit$theta_tilde[((p + 1):(2 * p + 1))]
       AIC <- -2 * fit$value + 2 * p
       fit <- list(fit = fit, logLik = fit$value, AIC = AIC, Delta = Delta)
     } else {
@@ -137,7 +142,7 @@ countmodel <- function(
     fit$labels <- labels
     fit$approach <- approach
     fit$link <- link
-    class(fit) <- classr
+    class(fit) <- c("cms", classr)
     return(fit)
   } else {
     if (family == "poisson") {
@@ -255,7 +260,7 @@ countmodel <- function(
       if (hessian == TRUE) {
         fit$hessian <- -fit$hessian
       }
-      fit$par <- fit$theta_tilde[(p + q + 1):(2 * (p + q))]
+      fit$par <- fit$theta_tilde[(p + q + 1):(2 * (p + q) + 1)]
       AIC <- -2 * fit$value + 2 * (p + q)
       fit <- list(
         fit = fit,
@@ -291,7 +296,8 @@ countmodel <- function(
     fit$approach <- approach
     fit$link1 <- link1
     fit$link2 <- link2
-    class(fit) <- classr
+    fit$case <- case
+    class(fit) <- c("cmai", classr)
     return(fit)
   }
 }

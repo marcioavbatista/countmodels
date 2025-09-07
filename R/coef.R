@@ -1,18 +1,12 @@
 #'@export
-coef.poisreg <- function(object, ...) {
-  coeffs <- object$fit$par
+coef.cms <- function(object, ...) {
+  coeffs <- object$fit$par[-1]
   names(coeffs) <- object$labels
   return(coeffs)
 }
 #'@export
-coef.zapoisreg <- function(object, ...) {
-  coeffs <- object$fit$par
-  names(coeffs) <- c("psi", object$labels)
-  return(coeffs)
-}
-#'@export
-coef.zipoisreg <- function(object, ...) {
-  coefs <- object$fit$par
+coef.cmai <- function(object, ...) {
+  coefs <- object$fit$par[-1]
   p <- object$p
   q <- object$q
   coeffs1 <- coefs[1:q]
