@@ -96,7 +96,7 @@ jobs:
           pkg <- c(tar_files, tgz_files)
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
-          commit = T, location = "docs/")
+          commit = T)
           RSCRIPT
           Rscript insert_to_drat.R
       
@@ -119,7 +119,7 @@ jobs:
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
-          commit = T, location = "docs/")
+          commit = T)
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
           Rscript insert_to_drat.R
