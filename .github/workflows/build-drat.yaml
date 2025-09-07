@@ -44,6 +44,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          cd ..
           git config --global user.email 'actions@github.com'
           git config --global user.name 'GitHub Actions'
           $r = @'
@@ -54,7 +55,7 @@ jobs:
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
           insertPackage(pkg,
-                        repodir = "marcio-lib/drat",
+                        repodir = "countmodels/marcio-lib/drat",
                         commit = TRUE, push = TRUE,
                         binarize = TRUE)
           '@
