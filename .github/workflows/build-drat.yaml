@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
       # 1️⃣ Clona o repositório do pacote (countmodels)
@@ -29,35 +29,98 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
-
+      
       # 4️⃣ Instala dependências
       - name: Install R dependencies
         run: |
-          Rscript -e 'install.packages(c("devtools","drat","rcmdcheck"))'
+             Rscript -e "install.packages('RcppParallel')"
+             Rscript -e "install.packages('rstan')"
+             Rscript -e "install.packages('rstantools')"
+             Rscript -e "install.packages('BH')"
+             Rscript -e "install.packages('RcppEigen')"
+             Rscript -e "install.packages('StanHeaders')"
+             Rscript -e "install.packages('devtools')"
+             Rscript -e "install.packages('drat')"
+             Rscript -e "install.packages('rcmdcheck')"
 
-      # 5️⃣ Cria o pacote source
-      - name: Build package source
-        run: Rscript -e 'devtools::build()'
+      # 5️⃣ Build para Linux e macOS (bash)
+      - name: Build package (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            echo "Configurando para macOS arm64..."
+            Rscript -e "
+            Sys.setenv(CMAKE_CXX_COMPILER = '/usr/bin/clang++')
+            Sys.setenv(CMAKE_C_COMPILER = '/usr/bin/clang')
+            Sys.setenv(FLAGS = '-O2 -arch arm64')
+            devtools::build()
+            "
+          else
+            # Linux
+            Rscript -e "devtools::build()"
+          fi
+      
+          # Tenta binário apenas se não for Linux
+          if [[ "$RUNNER_OS" != "Linux" ]]; then
+            Rscript -e "
+            tryCatch({
+              devtools::build(binary = TRUE)
+            }, error = function(e) {
+              message('Binary build failed: ', e$message)
+            })
+            "
+          fi
+      
+      # 6️⃣ Build para Windows (PowerShell)
+      - name: Build package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Windows - sempre tenta source e binário
+          Rscript -e "devtools::build()"
+          Rscript -e "devtools::build(binary = TRUE)"
 
+      # 6️⃣ Insere pacote no drat (Linux/macOS → bash)
+      - name: Insert package to drat (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          cat > insert_to_drat.R <<'RSCRIPT'
+          library(drat)
+          original_dir <- getwd()
+          setwd("..")
+          files <- list.files(full.names = TRUE)
+          tar_files <- files[endsWith(files, ".tar.gz")]
+          tgz_files <- files[endsWith(files, ".tgz")]
+          pkg <- c(tar_files, tgz_files)
+          if (length(pkg) == 0) stop("No tar.gz found")
+          insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
+          commit = T)
+          RSCRIPT
+          Rscript insert_to_drat.R
+      
       # 7️⃣ Insere pacote no drat (Windows → PowerShell)
       - name: Insert package to drat (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          cd ..
           git config --global user.email 'actions@github.com'
           git config --global user.name 'GitHub Actions'
           $r = @'
           library(drat)
+          original_dir <- getwd()
+          setwd("..")
           files <- list.files(full.names = TRUE)
           cat(files)
-          pkg <- files[endsWith(files, ".tar.gz")]
+          tar_files <- files[endsWith(files, ".tar.gz")]
+          tgz_files <- files[endsWith(files, ".zip")]
+          pkg <- c(tar_files, tgz_files)
           cat(pkg)
           if (length(pkg) == 0) stop("No tar.gz found")
-          insertPackage(pkg,
-                        repodir = "countmodels/marcio-lib/drat",
-                        commit = TRUE, push = TRUE,
-                        binarize = TRUE)
+          insertPackage(file = pkg, repodir = file.path(original_dir,"marcio-lib"),
+          commit = T)
           '@
           $r | Out-File -Encoding UTF8 insert_to_drat.R
-          Rscript countmodels/insert_to_drat.R
+          Rscript insert_to_drat.R
+
