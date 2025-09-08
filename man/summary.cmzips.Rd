@@ -2,16 +2,15 @@
 % Please edit documentation in R/summary_cmzips.R
 \name{summary.cmzips}
 \alias{summary.cmzips}
-\alias{summary.zipoisreg}
-\title{Summary for the zipoisreg model}
+\title{Summary for the zero inflated poisson model}
 \usage{
 \method{summary}{cmzips}(object, ...)
 }
 \arguments{
-\item{object}{an objecto of the class 'zipoisreg'.}
+\item{object}{an objecto of the class 'cmzips'.}
 
 \item{...}{further arguments passed to or from other methods.}
 }
 \description{
-Summary for the zipoisreg model
+Summary for the zero inflated poisson model
 }

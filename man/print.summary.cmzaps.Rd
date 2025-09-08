@@ -2,12 +2,12 @@
 % Please edit documentation in R/summary_cmzips.R
 \name{print.summary.cmzaps}
 \alias{print.summary.cmzaps}
-\title{Print the summary.zipoisreg output}
+\title{Print the summary.cmzaps output}
 \usage{
 \method{print}{summary.cmzaps}(x, ...)
 }
 \arguments{
-\item{x}{an object of the class summary.zipoisreg.}
+\item{x}{an object of the class summary.cmzaps.}
 
 \item{...}{further arguments passed to or from other methods.}
 }
@@ -15,5 +15,5 @@
 a summary of the fitted model.
 }
 \description{
-Print the summary.zipoisreg output
+Print the summary.cmzaps output
 }

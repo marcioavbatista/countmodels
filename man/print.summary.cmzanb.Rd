@@ -2,12 +2,12 @@
 % Please edit documentation in R/summary_negbinom.R
 \name{print.summary.cmzanb}
 \alias{print.summary.cmzanb}
-\title{Print the summary.zipoisreg output}
+\title{Print the summary.cmzanb output}
 \usage{
 \method{print}{summary.cmzanb}(x, ...)
 }
 \arguments{
-\item{x}{an object of the class summary.zipoisreg.}
+\item{x}{an object of the class summary.cmzanb.}
 
 \item{...}{further arguments passed to or from other methods.}
 }
@@ -15,5 +15,5 @@
 a summary of the fitted model.
 }
 \description{
-Print the summary.zipoisreg output
+Print the summary.cmzanb output
 }

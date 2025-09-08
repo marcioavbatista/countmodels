@@ -1,4 +1,13 @@
-#'@export
+#---------------------------------------------
+#' Variance-covariance matrix for a standard count model
+#'
+#' @aliases vcov.cms
+#' @description This function extracts and returns the variance-covariance matrix associated with the regression coefficients when the maximum likelihood estimation approach is used in the model fitting.
+#' @export
+#' @param object an object of the class cms.
+#' @param ... further arguments passed to or from other methods.
+#' @return  the variance-covariance matrix associated with the regression coefficients.
+#'
 vcov.cms <- function(object, ...) {
   Delta <- object$Delta
   hessian <- object$fit$hessian[-(object$p + 1), -(object$p + 1)]
@@ -8,7 +17,16 @@ vcov.cms <- function(object, ...) {
   rownames(V) <- object$labels
   return(V)
 }
-#'@export
+#---------------------------------------------
+#' Variance-covariance matrix for a inflated or hurdle count model
+#'
+#' @aliases vcov.cmai
+#' @description This function extracts and returns the variance-covariance matrix associated with the regression coefficients when the maximum likelihood estimation approach is used in the model fitting.
+#' @export
+#' @param object an object of the class cmai.
+#' @param ... further arguments passed to or from other methods.
+#' @return  the variance-covariance matrix associated with the regression coefficients.
+#'
 vcov.cmai <- function(object, ...) {
   Delta <- object$Delta
   hessian <- object$fit$hessian[

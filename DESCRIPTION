@@ -1,23 +1,32 @@
 Package: countmodels
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: Fits Count Models with Inflation of Zeros
+Version: 0.0.1
+Authors@R:c( 
+    person("Márcio", "Batista", email = "marcioavbatista@gmail.com", role = c("aut", "cre")),
+    person("Nicolas", "Monteiro", email = "nicolasabm@gmail.com", role = "ctb")
+    )
+Description: The package is built under rstan and works with both MLE and Bayesian 
+    approaches for Poisson and negative binomial regressions with the option of 
+    zero-inflation and hurdle models.
+License: MIT + file LICENSE
+URL: https://github.com/marcioavbatista/countmodels
+BugReports: https://github.com/marcioavbatista/countmodels/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Biarch: true
 Depends: 
     R (>= 3.4.0)
 Imports: 
     methods,
+    magic,
+    MASS,
     Rcpp (>= 0.12.0),
     RcppParallel (>= 5.0.1),
     rstan (>= 2.18.1),
-    rstantools (>= 2.4.0)
+    rstantools (>= 2.4.0),
+    stats,
+    graphics,
+    utils
 LinkingTo: 
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),

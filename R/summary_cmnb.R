@@ -1,11 +1,16 @@
-#@export
+#' Print the summary.cmnb output
+#'
+#' @export
+#' @param x an object of the class summary.cmnb.
+#' @param ... further arguments passed to or from other methods.
+#' @return a summary of the fitted model.
 print.summary.cmnb <- function(x, ...) {
   if (x$approach == "mle") {
     cat("Call:\n")
     print(x$call)
     cat("\n")
     cat("Coefficients:\n")
-    stats::printCoefmat(x$coefficients, P.value = TRUE, has.Pvalue = TRUE)
+    statsprintCoefmat(x$coefficients, P.value = TRUE, has.Pvalue = TRUE)
     cat("\n")
     # cat("----------------------- \n")
     # cat("\n")
@@ -39,7 +44,14 @@ print.summary.cmnb <- function(x, ...) {
   }
 }
 
-#'@export
+#---------------------------------------------
+
+#' Summary for the standard poisson  model
+#'
+#' @aliases summary.cmnb
+#' @export
+#' @param object an objecto of the class 'cmnb'.
+#' @param ... further arguments passed to or from other methods
 summary.cmnb <- function(object, ...) {
   if (object$approach == "mle") {
     p <- object$p
@@ -54,7 +66,7 @@ summary.cmnb <- function(object, ...) {
       Estimate = coefficients,
       StdErr = se,
       z.value = zval,
-      p.value = 2 * stats::pnorm(-abs(zval))
+      p.value = 2 * statspnorm(-abs(zval))
     )
 
     if (p == 1) {

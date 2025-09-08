@@ -2,16 +2,15 @@
 % Please edit documentation in R/summary_negbinom.R
 \name{summary.cmzanb}
 \alias{summary.cmzanb}
-\alias{summary.zipoisreg}
-\title{Summary for the zipoisreg model}
+\title{Summary for the zero adjusted negative binomial model}
 \usage{
 \method{summary}{cmzanb}(object, ...)
 }
 \arguments{
-\item{object}{an objecto of the class 'zipoisreg'.}
+\item{object}{an objecto of the class 'cmzanb'.}
 
 \item{...}{further arguments passed to or from other methods.}
 }
 \description{
-Summary for the zipoisreg model
+Summary for the zero adjusted negative binomial model
 }

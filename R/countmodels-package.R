@@ -2,7 +2,7 @@
 #'
 #' @description A DESCRIPTION OF THE PACKAGE
 #'
-#' @docType package
+#' @docType _PACKAGE
 #' @name countmodels-package
 #' @aliases countmodels
 #' @useDynLib countmodels, .registration = TRUE
@@ -11,7 +11,8 @@
 #' @importFrom rstan sampling
 #' @importFrom rstantools rstan_config
 #' @importFrom RcppParallel RcppParallelLibs
-#'
+#' @importFrom magic adiag
+#' @importFrom MASS ginv
 #' @references
 #' Stan Development Team (NA). RStan: the R interface to Stan. R package version 2.36.0.9000. https://mc-stan.org
 #'

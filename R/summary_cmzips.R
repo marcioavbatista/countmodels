@@ -1,7 +1,7 @@
-#' Print the summary.zipoisreg output
+#' Print the summary.cmzips output
 #'
 #' @export
-#' @param x an object of the class summary.zipoisreg.
+#' @param x an object of the class summary.cmzips.
 #' @param ... further arguments passed to or from other methods.
 #' @return a summary of the fitted model.
 print.summary.cmzips <- function(x, ...) {
@@ -53,11 +53,11 @@ print.summary.cmzips <- function(x, ...) {
 
 #---------------------------------------------
 
-#' Summary for the zipoisreg model
+#' Summary for the zero inflated poisson model
 #'
-#' @aliases summary.zipoisreg
+#' @aliases summary.cmzips
 #' @export
-#' @param object an objecto of the class 'zipoisreg'.
+#' @param object an objecto of the class 'cmzips'.
 #' @param ... further arguments passed to or from other methods.
 #'
 summary.cmzips <- function(object, ...) {
@@ -131,10 +131,10 @@ summary.cmzips <- function(object, ...) {
 }
 
 
-#' Print the summary.zipoisreg output
+#' Print the summary.cmzaps output
 #'
 #' @export
-#' @param x an object of the class summary.zipoisreg.
+#' @param x an object of the class summary.cmzaps.
 #' @param ... further arguments passed to or from other methods.
 #' @return a summary of the fitted model.
 print.summary.cmzaps <- function(x, ...) {
@@ -186,11 +186,11 @@ print.summary.cmzaps <- function(x, ...) {
 
 #---------------------------------------------
 
-#' Summary for the zipoisreg model
+#' Summary for the zero adjusted poisson model
 #'
-#' @aliases summary.zipoisreg
+#' @aliases summary.cmzaps
 #' @export
-#' @param object an objecto of the class 'zipoisreg'.
+#' @param object an objecto of the class 'cmzaps'.
 #' @param ... further arguments passed to or from other methods.
 #'
 summary.cmzaps <- function(object, ...) {

@@ -1,7 +1,7 @@
-#' Print the summary.zipoisreg output
+#' Print the summary.cmzinb output
 #'
 #' @export
-#' @param x an object of the class summary.zipoisreg.
+#' @param x an object of the class summary.cmzinb.
 #' @param ... further arguments passed to or from other methods.
 #' @return a summary of the fitted model.
 print.summary.cmzinb <- function(x, ...) {
@@ -56,11 +56,11 @@ print.summary.cmzinb <- function(x, ...) {
 
 #---------------------------------------------
 
-#' Summary for the zipoisreg model
+#' Summary for the zero inflated negative binomial model
 #'
-#' @aliases summary.zipoisreg
+#' @aliases summary.cmzinb
 #' @export
-#' @param object an objecto of the class 'zipoisreg'.
+#' @param object an objecto of the class 'cmzinb'.
 #' @param ... further arguments passed to or from other methods.
 #'
 summary.cmzinb <- function(object, ...) {
@@ -138,10 +138,10 @@ summary.cmzinb <- function(object, ...) {
 }
 
 
-#' Print the summary.zipoisreg output
+#' Print the summary.cmzanb output
 #'
 #' @export
-#' @param x an object of the class summary.zipoisreg.
+#' @param x an object of the class summary.cmzanb.
 #' @param ... further arguments passed to or from other methods.
 #' @return a summary of the fitted model.
 print.summary.cmzanb <- function(x, ...) {
@@ -196,11 +196,11 @@ print.summary.cmzanb <- function(x, ...) {
 
 #---------------------------------------------
 
-#' Summary for the zipoisreg model
+#' Summary for the zero adjusted negative binomial model
 #'
-#' @aliases summary.zipoisreg
+#' @aliases summary.cmzanb
 #' @export
-#' @param object an objecto of the class 'zipoisreg'.
+#' @param object an objecto of the class 'cmzanb'.
 #' @param ... further arguments passed to or from other methods.
 #'
 summary.cmzanb <- function(object, ...) {

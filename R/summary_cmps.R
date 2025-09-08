@@ -1,4 +1,9 @@
-#'@export
+#' Print the summary.cmps output
+#'
+#' @export
+#' @param x an object of the class summary.cmps.
+#' @param ... further arguments passed to or from other methods.
+#' @return a summary of the fitted model.
 print.summary.cmps <- function(x, ...) {
   if (x$approach == "mle") {
     cat("Call:\n")
@@ -37,7 +42,14 @@ print.summary.cmps <- function(x, ...) {
   }
 }
 
-#'@export
+#---------------------------------------------
+
+#' Summary for the standard poisson  model
+#'
+#' @aliases summary.cmps
+#' @export
+#' @param object an objecto of the class 'cmps'.
+#' @param ... further arguments passed to or from other methods.
 summary.cmps <- function(object, ...) {
   if (object$approach == "mle") {
     p <- object$p
